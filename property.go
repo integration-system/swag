@@ -124,6 +124,9 @@ func getArrayPropertyName(astTypeArray *ast.ArrayType, parser *Parser) propertyN
 			return propertyName{SchemaType: "array", ArrayType: name}
 		}
 	}
+	if _, ok := astTypeArray.Elt.(*ast.InterfaceType); ok {
+		return propertyName{SchemaType: "array", ArrayType: "object"}
+	}
 	itemTypeName := TransToValidSchemeType(fmt.Sprintf("%s", astTypeArray.Elt))
 	if actualPrimitiveType, isCustomType := parser.CustomPrimitiveTypes[itemTypeName]; isCustomType {
 		itemTypeName = actualPrimitiveType

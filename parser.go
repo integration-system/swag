@@ -853,7 +853,7 @@ func (parser *Parser) parseStructField(pkgName string, field *ast.Field) (map[st
 				},
 			}
 		} else if structField.arrayType == "object" {
-			// Anonymous struct
+			// Anonymous struct or interface
 			if astTypeArray, ok := field.Type.(*ast.ArrayType); ok { // if array
 				props := make(map[string]spec.Schema)
 				if expr, ok := astTypeArray.Elt.(*ast.StructType); ok {
@@ -880,6 +880,20 @@ func (parser *Parser) parseStructField(pkgName string, field *ast.Field) (map[st
 								},
 							},
 						}}
+				} else if _, ok := astTypeArray.Elt.(*ast.InterfaceType); ok {
+					properties[structField.name] = spec.Schema{
+						SchemaProps: spec.SchemaProps{
+							Type:        []string{structField.schemaType},
+							Description: desc,
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:       []string{"object"},
+									},
+								},
+							},
+						}}
+
 				}
 			}
 		} else {
