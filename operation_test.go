@@ -318,8 +318,7 @@ func TestParseParamCommentByPathType(t *testing.T) {
 	assert.Equal(t, expected, string(b))
 }
 
-// Test ParseParamComment Query Params
-func TestParseParamCommentBodyArray(t *testing.T) {
+func TestParseParamCommentBodyStringArray(t *testing.T) {
 	comment := `@Param names body []string true "Users List"`
 	operation := NewOperation()
 	err := operation.ParseComment(comment, nil)
@@ -334,9 +333,34 @@ func TestParseParamCommentBodyArray(t *testing.T) {
             "in": "body",
             "required": true,
             "schema": {
-                "type": "string",
+                "type": "array",
                 "items": {
                     "type": "string"
+                }
+            }
+        }
+    ]
+}`
+	assert.Equal(t, expected, string(b))
+}
+
+func TestParseParamCommentBodyIntArray(t *testing.T) {
+	comment := `@Param ids body []int false "ID List"`
+	operation := NewOperation()
+	err := operation.ParseComment(comment, nil)
+
+	assert.NoError(t, err)
+	b, _ := json.MarshalIndent(operation, "", "    ")
+	expected := `{
+    "parameters": [
+        {
+            "description": "ID List",
+            "name": "ids",
+            "in": "body",
+            "schema": {
+                "type": "array",
+                "items": {
+                    "type": "integer"
                 }
             }
         }

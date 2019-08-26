@@ -143,7 +143,7 @@ func (operation *Operation) ParseParamComment(commentLine string, astFile *ast.F
 	objectType := "object"
 	if strings.HasPrefix(refType, "[]") == true {
 		objectType = "array"
-		refType = strings.TrimPrefix(refType, "[]")
+		refType = TransToValidSchemeType(strings.TrimPrefix(refType, "[]"))
 	} else if IsPrimitiveType(refType) ||
 		paramType == "formData" && refType == "file" {
 		objectType = "primitive"
@@ -186,7 +186,8 @@ func (operation *Operation) ParseParamComment(commentLine string, astFile *ast.F
 					SchemaProps: spec.SchemaProps{},
 				},
 			}
-			// Arrau of Primitive or Object
+			param.Schema.Type = spec.StringOrArray{"array"}
+			// Array of Primitive or Object
 			if IsPrimitiveType(refType) {
 				param.Schema.Items.Schema.Type = spec.StringOrArray{refType}
 			} else {
