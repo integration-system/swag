@@ -3,6 +3,7 @@ module github.com/swaggo/swag
 require (
 	github.com/KyleBanks/depth v1.2.1
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
+	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-openapi/jsonreference v0.19.0
 	github.com/go-openapi/spec v0.19.0
