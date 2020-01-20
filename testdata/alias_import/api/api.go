@@ -1,10 +1,11 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/swaggo/swag/testdata/alias_import/data"
-	"github.com/swaggo/swag/testdata/alias_type/types"
 	"log"
+
+	"github.com/gin-gonic/gin"
+	"github.com/integration-system/swag/testdata/alias_import/data"
+	"github.com/integration-system/swag/testdata/alias_type/types"
 )
 
 // @Summary Get application

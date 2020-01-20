@@ -806,6 +806,7 @@ func (sf *structField) toStandardSchema() *spec.Schema {
 			Minimum:     sf.minimum,
 			MaxLength:   sf.maxLength,
 			MinLength:   sf.minLength,
+			Pattern:     sf.pattern,
 			Enum:        sf.enums,
 			Default:     sf.defaultValue,
 		},
@@ -977,23 +978,22 @@ func (parser *Parser) parseStructField(pkgName string, field *ast.Field) (map[st
 							ReadOnly: structField.readOnly,
 						},
 					}
-				}
-			} else {
-				schema, _ := parser.parseTypeExpr(pkgName, "", astTypeArray.Elt)
-				properties[structField.name] = spec.Schema{
-					SchemaProps: spec.SchemaProps{
-						Type:        []string{structField.schemaType},
-						Description: structField.desc,
-						Items: &spec.SchemaOrArray{
-							Schema: schema,
+				} else {
+					schema, _ := parser.parseTypeExpr(pkgName, "", astTypeArray.Elt)
+					properties[structField.name] = spec.Schema{
+						SchemaProps: spec.SchemaProps{
+							Type:        []string{structField.schemaType},
+							Description: structField.desc,
+							Items: &spec.SchemaOrArray{
+								Schema: schema,
+							},
 						},
-					},
-					SwaggerSchemaProps: spec.SwaggerSchemaProps{
-						ReadOnly: structField.readOnly,
-					},
+						SwaggerSchemaProps: spec.SwaggerSchemaProps{
+							ReadOnly: structField.readOnly,
+						},
+					}
 				}
 			}
-		}
 		} else if structField.arrayType == "array" {
 			if astTypeArray, ok := field.Type.(*ast.ArrayType); ok {
 				schema, _ := parser.parseTypeExpr(pkgName, "", astTypeArray.Elt)
@@ -1039,41 +1039,10 @@ func (parser *Parser) parseStructField(pkgName string, field *ast.Field) (map[st
 					},
 				},
 				SwaggerSchemaProps: spec.SwaggerSchemaProps{
-					Example: structField.exampleValue,
+					Example:  structField.exampleValue,
+					ReadOnly: structField.readOnly,
 				},
 			}
-		}
-	} else {
-		// standard type in array
-		required := make([]string, 0)
-		if structField.isRequired {
-			required = append(required, structField.name)
-		}
-		properties[structField.name] = spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type:        []string{structField.schemaType},
-				Description: structField.desc,
-				Format:      structField.formatType,
-				Pattern:     structField.pattern,
-				Required:    required,
-				Items: &spec.SchemaOrArray{
-					Schema: &spec.Schema{
-						SchemaProps: spec.SchemaProps{
-							Type:      []string{structField.arrayType},
-							Maximum:   structField.maximum,
-							Minimum:   structField.minimum,
-							MaxLength: structField.maxLength,
-							MinLength: structField.minLength,
-							Enum:      structField.enums,
-							Default:   structField.defaultValue,
-						},
-					},
-				},
-			},
-			SwaggerSchemaProps: spec.SwaggerSchemaProps{
-				Example:  structField.exampleValue,
-				ReadOnly: structField.readOnly,
-			},
 		}
 	} else if astTypeMap, ok := field.Type.(*ast.MapType); ok { // if map
 		stdSchema := structField.toStandardSchema()
@@ -1234,7 +1203,6 @@ func setValidTagValidators(validators map[string][]string, t *structField) {
 		}
 	}
 }
-
 
 func getValidTagValidatorFunction(val string) (string, []string) {
 	for key, value := range govalidator.ParamTagRegexMap {
