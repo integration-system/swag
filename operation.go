@@ -18,7 +18,7 @@ import (
 )
 
 // Operation describes a single API operation on a path.
-// For more information: https://github.com/integration-system/swag#api-operation
+// For more information: https://github.com/swaggo/swag#api-operation
 type Operation struct {
 	HTTPMethod string
 	Path       string
@@ -143,7 +143,7 @@ func (operation *Operation) ParseParamComment(commentLine string, astFile *ast.F
 	objectType := "object"
 	if strings.HasPrefix(refType, "[]") == true {
 		objectType = "array"
-		refType = TransToValidSchemeType(strings.TrimPrefix(refType, "[]"))
+		refType = strings.TrimPrefix(refType, "[]")
 	} else if IsPrimitiveType(refType) ||
 		paramType == "formData" && refType == "file" {
 		objectType = "primitive"
@@ -186,8 +186,7 @@ func (operation *Operation) ParseParamComment(commentLine string, astFile *ast.F
 					SchemaProps: spec.SchemaProps{},
 				},
 			}
-			param.Schema.Type = spec.StringOrArray{"array"}
-			// Array of Primitive or Object
+			// Arrau of Primitive or Object
 			if IsPrimitiveType(refType) {
 				param.Schema.Items.Schema.Type = spec.StringOrArray{refType}
 			} else {

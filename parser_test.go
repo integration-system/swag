@@ -253,8 +253,8 @@ func TestGetAllGoFileInfo(t *testing.T) {
 	err := p.getAllGoFileInfo(searchDir)
 
 	assert.NoError(t, err)
-	assert.NotEmpty(t, p.files["testdata/pet/main.go"])
-	assert.NotEmpty(t, p.files["testdata/pet/web/handler.go"])
+	assert.NotEmpty(t, p.files[filepath.Join("testdata", "pet", "main.go")])
+	assert.NotEmpty(t, p.files[filepath.Join("testdata", "pet", "web", "handler.go")])
 	assert.Equal(t, 2, len(p.files))
 }
 
@@ -378,7 +378,6 @@ func TestParseSimpleApi1(t *testing.T) {
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/web.Pet"
                         }
                     }
@@ -521,7 +520,9 @@ func TestParseSimpleApi1(t *testing.T) {
             "type": "array",
             "items": {
                 "type": "object",
-                "additionalProperties": {}
+                "additionalProperties": {
+                    "type": "string"
+                }
             }
         },
         "cross.Cross": {
@@ -564,18 +565,7 @@ func TestParseSimpleApi1(t *testing.T) {
             }
         },
         "web.CrossAlias": {
-            "type": "object",
-            "properties": {
-                "Array": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "String": {
-                    "type": "string"
-                }
-            }
+            "$ref": "#/definitions/cross.Cross"
         },
         "web.IndirectRecursiveTest": {
             "type": "object",
@@ -669,6 +659,7 @@ func TestParseSimpleApi1(t *testing.T) {
                 "id": {
                     "type": "integer",
                     "format": "int64",
+                    "readOnly": true,
                     "example": 1
                 },
                 "int_array": {
@@ -838,22 +829,7 @@ func TestParseSimpleApi1(t *testing.T) {
         "web.Tags": {
             "type": "array",
             "items": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "pets": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/definitions/web.Pet"
-                        }
-                    }
-                }
+                "$ref": "#/definitions/web.Tag"
             }
         }
     },
@@ -1005,7 +981,6 @@ func TestParseSimpleApi_ForSnakecase(t *testing.T) {
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/web.Pet"
                         }
                     }
@@ -1489,7 +1464,6 @@ func TestParseSimpleApi_ForLowerCamelcase(t *testing.T) {
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/web.Pet"
                         }
                     }
@@ -2045,7 +2019,6 @@ func TestParseModelNotUnderRoot(t *testing.T) {
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/data.Foo"
                         }
                     }
@@ -2240,15 +2213,48 @@ func TestParseComposition(t *testing.T) {
 	assert.NoError(t, err)
 
 	b, _ := json.MarshalIndent(p.swagger, "", "    ")
+
+	//windows will fail: \r\n \n
 	assert.Equal(t, string(expected), string(b))
 }
 
-func TestParser_ParseStuctArrayObject(t *testing.T) {
+func TestParseImportAliases(t *testing.T) {
+	searchDir := "testdata/alias_import"
+	mainAPIFile := "main.go"
+	p := New()
+	err := p.ParseAPI(searchDir, mainAPIFile)
+	assert.NoError(t, err)
+
+	expected, err := ioutil.ReadFile(path.Join(searchDir, "expected.json"))
+	assert.NoError(t, err)
+
+	b, _ := json.MarshalIndent(p.swagger, "", "    ")
+	//windows will fail: \r\n \n
+	assert.Equal(t, string(expected), string(b))
+}
+
+func TestParseNested(t *testing.T) {
+	searchDir := "testdata/nested"
+	mainAPIFile := "main.go"
+	p := New()
+	p.ParseDependency = true
+	err := p.ParseAPI(searchDir, mainAPIFile)
+	assert.NoError(t, err)
+
+	expected, err := ioutil.ReadFile(path.Join(searchDir, "expected.json"))
+	assert.NoError(t, err)
+
+	b, _ := json.MarshalIndent(p.swagger, "", "    ")
+	assert.Equal(t, string(expected), string(b))
+}
+
+func TestParser_ParseStructArrayObject(t *testing.T) {
 	src := `
 package api
 
 type Response struct {
 	Code int
+	Table [][]string
 	Data []struct{
 		Field1 uint 
 		Field2 string 
@@ -2278,6 +2284,15 @@ func Test(){
                   "field2": {
                      "type": "string"
                   }
+               }
+            }
+         },
+         "table": {
+            "type": "array",
+            "items": {
+               "type": "array",
+               "items": {
+                  "type": "string"
                }
             }
          }
@@ -2369,6 +2384,194 @@ type ResponseWrapper struct {
 	assert.NoError(t, err)
 	assert.Equal(t, expected, string(out))
 
+}
+
+func TestParser_ParseStructPointerMembers(t *testing.T) {
+	src := `
+package api
+
+type Child struct {
+	Name string
+}
+
+type Parent struct {
+	Test1 *string  //test1
+	Test2 *Child   //test2
+}
+
+// @Success 200 {object} Parent
+// @Router /api/{id} [get]
+func Test(){
+}
+`
+
+	expected := `{
+   "api.Child": {
+      "type": "object",
+      "properties": {
+         "name": {
+            "type": "string"
+         }
+      }
+   },
+   "api.Parent": {
+      "type": "object",
+      "properties": {
+         "test1": {
+            "description": "test1",
+            "type": "string"
+         },
+         "test2": {
+            "description": "test2",
+            "type": "object",
+            "$ref": "#/definitions/api.Child"
+         }
+      }
+   }
+}`
+
+	f, err := goparser.ParseFile(token.NewFileSet(), "", src, goparser.ParseComments)
+	assert.NoError(t, err)
+
+	p := New()
+	p.ParseType(f)
+	err = p.ParseRouterAPIInfo("", f)
+	assert.NoError(t, err)
+
+	typeSpec := p.TypeDefinitions["api"]["Parent"]
+	err = p.ParseDefinition("api", typeSpec.Name.Name, typeSpec)
+	assert.NoError(t, err)
+
+	out, err := json.MarshalIndent(p.swagger.Definitions, "", "   ")
+	assert.NoError(t, err)
+	assert.Equal(t, expected, string(out))
+}
+
+func TestParser_ParseStructMapMember(t *testing.T) {
+	src := `
+package api
+
+type MyMapType map[string]string
+
+type Child struct {
+	Name string
+}
+
+type Parent struct {
+	Test1 map[string]interface{}  //test1
+	Test2 map[string]string		  //test2
+	Test3 map[string]*string	  //test3
+	Test4 map[string]Child		  //test4
+	Test5 map[string]*Child		  //test5
+	Test6 MyMapType				  //test6
+	Test7 []Child				  //test7
+	Test8 []*Child				  //test8
+	Test9 []map[string]string	  //test9
+}
+
+// @Success 200 {object} Parent
+// @Router /api/{id} [get]
+func Test(){
+}
+`
+	expected := `{
+   "api.Child": {
+      "type": "object",
+      "properties": {
+         "name": {
+            "type": "string"
+         }
+      }
+   },
+   "api.MyMapType": {
+      "type": "object",
+      "additionalProperties": {
+         "type": "string"
+      }
+   },
+   "api.Parent": {
+      "type": "object",
+      "properties": {
+         "test1": {
+            "description": "test1",
+            "type": "object",
+            "additionalProperties": true
+         },
+         "test2": {
+            "description": "test2",
+            "type": "object",
+            "additionalProperties": {
+               "type": "string"
+            }
+         },
+         "test3": {
+            "description": "test3",
+            "type": "object",
+            "additionalProperties": {
+               "type": "string"
+            }
+         },
+         "test4": {
+            "description": "test4",
+            "type": "object",
+            "additionalProperties": {
+               "$ref": "#/definitions/api.Child"
+            }
+         },
+         "test5": {
+            "description": "test5",
+            "type": "object",
+            "additionalProperties": {
+               "$ref": "#/definitions/api.Child"
+            }
+         },
+         "test6": {
+            "description": "test6",
+            "type": "object",
+            "$ref": "#/definitions/api.MyMapType"
+         },
+         "test7": {
+            "description": "test7",
+            "type": "array",
+            "items": {
+               "$ref": "#/definitions/api.Child"
+            }
+         },
+         "test8": {
+            "description": "test8",
+            "type": "array",
+            "items": {
+               "$ref": "#/definitions/api.Child"
+            }
+         },
+         "test9": {
+            "description": "test9",
+            "type": "array",
+            "items": {
+               "type": "object",
+               "additionalProperties": {
+                  "type": "string"
+               }
+            }
+         }
+      }
+   }
+}`
+	f, err := goparser.ParseFile(token.NewFileSet(), "", src, goparser.ParseComments)
+	assert.NoError(t, err)
+
+	p := New()
+	p.ParseType(f)
+	err = p.ParseRouterAPIInfo("", f)
+	assert.NoError(t, err)
+
+	typeSpec := p.TypeDefinitions["api"]["Parent"]
+	err = p.ParseDefinition("api", typeSpec.Name.Name, typeSpec)
+	assert.NoError(t, err)
+
+	out, err := json.MarshalIndent(p.swagger.Definitions, "", "   ")
+	assert.NoError(t, err)
+	assert.Equal(t, expected, string(out))
 }
 
 func TestParser_ParseRouterApiInfoErr(t *testing.T) {
@@ -2758,4 +2961,33 @@ func TestParseOutsideDependencies(t *testing.T) {
 	if err := p.ParseAPI(searchDir, mainAPIFile); err != nil {
 		t.Error("Failed to parse api: " + err.Error())
 	}
+}
+
+func TestParseStructParamCommentByQueryType(t *testing.T) {
+	src := `
+package main
+
+type Student struct {
+	Name string
+	Age int
+	Teachers []string
+	SkipField map[string]string
+}
+
+// @Param request query Student true "query params"
+// @Success 200
+// @Router /test [get]
+func Fun()  {
+
+}
+`
+	f, err := goparser.ParseFile(token.NewFileSet(), "", src, goparser.ParseComments)
+	assert.NoError(t, err)
+
+	p := New()
+	p.ParseType(f)
+	err = p.ParseRouterAPIInfo("", f)
+	assert.NoError(t, err)
+
+	assert.Equal(t, 3, len(p.swagger.Paths.Paths["/test"].Get.Parameters))
 }

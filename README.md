@@ -4,12 +4,12 @@
 
 [![Travis Status](https://img.shields.io/travis/swaggo/swag/master.svg)](https://travis-ci.org/swaggo/swag)
 [![Coverage Status](https://img.shields.io/codecov/c/github/swaggo/swag/master.svg)](https://codecov.io/gh/swaggo/swag)
-[![Go Report Card](https://goreportcard.com/badge/github.com/integration-system/swag)](https://goreportcard.com/report/github.com/integration-system/swag)
+[![Go Report Card](https://goreportcard.com/badge/github.com/swaggo/swag)](https://goreportcard.com/report/github.com/swaggo/swag)
 [![codebeat badge](https://codebeat.co/badges/71e2f5e5-9e6b-405d-baf9-7cc8b5037330)](https://codebeat.co/projects/github-com-swaggo-swag-master)
 [![Go Doc](https://godoc.org/github.com/integration-system/swagg?status.svg)](https://godoc.org/github.com/integration-system/swag)
 [![Backers on Open Collective](https://opencollective.com/swag/backers/badge.svg)](#backers) 
 [![Sponsors on Open Collective](https://opencollective.com/swag/sponsors/badge.svg)](#sponsors) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fswaggo%2Fswag.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fswaggo%2Fswag?ref=badge_shield)
-[![Release](https://img.shields.io/github/release/swaggo/swag.svg?style=flat-square)](https://github.com/integration-system/swag/releases)
+[![Release](https://img.shields.io/github/release/integration-system/swag.svg?style=flat-square)](https://github.com/integration-system/swag/releases)
 
 
 Swag converts Go annotations to Swagger Documentation 2.0. We've created a variety of plugins for popular [Go web frameworks](#supported-web-frameworks). This allows you to quickly integrate with an existing Go project (using Swagger UI).
@@ -45,7 +45,7 @@ $ go get -u github.com/integration-system/swag/cmd/swag
 ```
 To build from source you need [Go](https://golang.org/dl/) (1.9 or newer).
 
-Or download the pre-compiled binaries binray form [release page](https://github.com/integration-system/swag/releases).
+Or download a pre-compiled binary from [release page](https://github.com/integration-system/swag/releases).
 
 3. Run `swag init` in the project's root folder which contains the `main.go` file. This will parse your comments and generate the required files (`docs` folder and `docs/docs.go`).
 ```sh
@@ -71,7 +71,7 @@ OPTIONS:
    --generalInfo value, -g value       Go file path in which 'swagger general API Info' is written (default: "main.go")
    --dir value, -d value               Directory you want to parse (default: "./")
    --propertyStrategy value, -p value  Property Naming Strategy like snakecase,camelcase,pascalcase (default: "camelcase")
-   --output value, -o value            Output directory for al the generated files(swagger.json, swagger.yaml and doc.go) (default: "./docs")
+   --output value, -o value            Output directory for all the generated files(swagger.json, swagger.yaml and doc.go) (default: "./docs")
    --parseVendor                       Parse go files in 'vendor' folder, disabled by default
    --parseDependency                   Parse go files in outside dependency folder, disabled by default
 ```
@@ -277,7 +277,7 @@ func (c *Controller) ListAccounts(ctx *gin.Context) {
 $ swag init
 ```
 
-4.Run your app, and browse to http://localhost:8080/swagger/index.html. You will see Swagger 2.0 Api documents as shown below:
+4. Run your app, and browse to http://localhost:8080/swagger/index.html. You will see Swagger 2.0 Api documents as shown below:
 
 ![swagger_index.html](https://raw.githubusercontent.com/swaggo/swag/master/assets/swagger-image.png)
 
@@ -598,7 +598,7 @@ generated swagger doc as follows:
 
 ```go
 type Account struct {
-    ID   int    `json:"id"   extensions:"x-nullable,x-abc=def"` // extensions fields must start with "x-"
+    ID   string    `json:"id"   extensions:"x-nullable,x-abc=def"` // extensions fields must start with "x-"
 }
 ```
 

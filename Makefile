@@ -12,7 +12,7 @@ GOVET:=$(GOCMD) vet
 u := $(if $(update),-u)
 
 BINARY_NAME:=swag
-PACKAGES:=$(shell $(GOLIST) github.com/integration-system/swag github.com/integration-system/swag/cmd/swag github.com/integration-system/swag/gen)
+PACKAGES:=$(shell $(GOLIST) github.com/swaggo/swag github.com/swaggo/swag/cmd/swag github.com/swaggo/swag/gen)
 GOFILES:=$(shell find . -name "*.go" -type f)
 
 export GO111MODULE := on
@@ -61,8 +61,8 @@ deps:
 devel-deps:
 	GO111MODULE=off $(GOGET) -v ${u} \
 		golang.org/x/lint/golint \
-		github.com/integration-system/swag/cmd/swag	\
-		github.com/integration-system/swag/gen
+		github.com/swaggo/swag/cmd/swag	\
+		github.com/swaggo/swag/gen
 
 .PHONY: lint
 lint: devel-deps
