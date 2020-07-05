@@ -241,7 +241,7 @@ import (
 	"strings"
 
 	"github.com/alecthomas/template"
-	"github.com/integration-system/swag"
+	"github.com/swaggo/swag"
 )
 
 var doc = ` + "`{{ printDoc .Doc}}`" + `
