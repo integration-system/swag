@@ -1,9 +1,8 @@
 package main
 
 import (
-	"net/http"
-
-	"github.com/swaggo/swag/example/basic/api"
+	"github.com/gin-gonic/gin"
+	"github.com/integration-system/swag/example/basic/api"
 )
 
 // @title Swagger Example API
@@ -21,8 +20,10 @@ import (
 // @host petstore.swagger.io
 // @BasePath /v2
 func main() {
-	http.HandleFunc("/testapi/get-string-by-int/", api.GetStringByInt)
-	http.HandleFunc("//testapi/get-struct-array-by-string/", api.GetStructArrayByString)
-	http.HandleFunc("/testapi/upload", api.Upload)
-	http.ListenAndServe(":8080", nil)
+	r := gin.New()
+	r.GET("/testapi/get-string-by-int/:some_id", api.GetStringByInt)
+	r.GET("//testapi/get-struct-array-by-string/:some_id", api.GetStructArrayByString)
+	r.POST("/testapi/upload", api.Upload)
+	r.Run()
+
 }

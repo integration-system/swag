@@ -1,6 +1,8 @@
 package api
 
-import "net/http"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 // @Summary Add a new pet to the store
 // @Description get string by ID
@@ -13,5 +15,5 @@ import "net/http"
 // @Failure 400 {object} string "We need ID!!"
 // @Failure 404 {object} string "Can not find ID"
 // @Router /testapi/get-string-by-int/{some_id} [get]
-func GetStringByInt(w http.ResponseWriter, r *http.Request) {
+func GetStringByInt(c *gin.Context) {
 }

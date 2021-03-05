@@ -1,9 +1,8 @@
 package composition
 
 import (
-	"net/http"
-
-	"github.com/swaggo/swag/testdata/nested/api"
+	"github.com/gin-gonic/gin"
+	"github.com/integration-system/swag/testdata/nested/api"
 )
 
 // @title Swagger Example API
@@ -15,6 +14,7 @@ import (
 // @BasePath /v2
 
 func main() {
-	http.HandleFunc("/testapi/get-foo", api.GetFoo)
-	http.ListenAndServe(":8080", nil)
+	r := gin.New()
+	r.GET("/testapi/get-foo", api.GetFoo)
+	r.Run()
 }

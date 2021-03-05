@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	uuid "github.com/gofrs/uuid"
+	uuid "github.com/satori/go.uuid"
 	"github.com/shopspring/decimal"
 )
 

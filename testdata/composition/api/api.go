@@ -1,9 +1,8 @@
 package api
 
 import (
-	"net/http"
-
-	"github.com/swaggo/swag/testdata/composition/common"
+	"github.com/gin-gonic/gin"
+	"github.com/integration-system/swag/testdata/composition/common"
 )
 
 type Foo struct {
@@ -53,7 +52,7 @@ type MapValue struct {
 // @Produce json
 // @Success 200 {object} api.Foo
 // @Router /testapi/get-foo [get]
-func GetFoo(w http.ResponseWriter, r *http.Request) {
+func GetFoo(c *gin.Context) {
 	//write your code
 	var _ = Foo{}
 }
@@ -64,7 +63,7 @@ func GetFoo(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Success 200 {object} api.Bar
 // @Router /testapi/get-bar [get]
-func GetBar(w http.ResponseWriter, r *http.Request) {
+func GetBar(c *gin.Context) {
 	//write your code
 	var _ = Bar{}
 }
@@ -75,7 +74,7 @@ func GetBar(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Success 200 {object} api.FooBar
 // @Router /testapi/get-foobar [get]
-func GetFooBar(w http.ResponseWriter, r *http.Request) {
+func GetFooBar(c *gin.Context) {
 	//write your code
 	var _ = FooBar{}
 }
@@ -86,7 +85,7 @@ func GetFooBar(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Success 200 {object} api.FooBarPointer
 // @Router /testapi/get-foobar-pointer [get]
-func GetFooBarPointer(w http.ResponseWriter, r *http.Request) {
+func GetFooBarPointer(c *gin.Context) {
 	//write your code
 	var _ = FooBarPointer{}
 }
@@ -97,7 +96,7 @@ func GetFooBarPointer(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Success 200 {object} api.BarMap
 // @Router /testapi/get-barmap [get]
-func GetBarMap(w http.ResponseWriter, r *http.Request) {
+func GetBarMap(c *gin.Context) {
 	//write your code
 	var _ = BarMap{}
 }
@@ -108,7 +107,7 @@ func GetBarMap(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Success 200 {object} api.FooBarMap
 // @Router /testapi/get-foobarmap [get]
-func GetFooBarMap(w http.ResponseWriter, r *http.Request) {
+func GetFooBarMap(c *gin.Context) {
 	//write your code
 	var _ = FooBarMap{}
 }

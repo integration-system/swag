@@ -1,9 +1,8 @@
 package composition
 
 import (
-	"net/http"
-
-	"github.com/swaggo/swag/testdata/composition/api"
+	"github.com/gin-gonic/gin"
+	"github.com/integration-system/swag/testdata/composition/api"
 )
 
 // @title Swagger Example API
@@ -15,10 +14,11 @@ import (
 // @BasePath /v2
 
 func main() {
-	http.handleFunc("/testapi/get-foo", api.GetFoo)
-	http.handleFunc("/testapi/get-bar", api.GetBar)
-	http.handleFunc("/testapi/get-foobar", api.GetFooBar)
-	http.handleFunc("/testapi/get-foobar-pointer", api.GetFooBarPointer)
-	http.handleFunc("/testapi/get-barmap", api.GetBarMap)
-	http.ListenAndServe(":8080", nil)
+	r := gin.New()
+	r.GET("/testapi/get-foo", api.GetFoo)
+	r.GET("/testapi/get-bar", api.GetBar)
+	r.GET("/testapi/get-foobar", api.GetFooBar)
+	r.GET("/testapi/get-foobar-pointer", api.GetFooBarPointer)
+	r.GET("/testapi/get-barmap", api.GetBarMap)
+	r.Run()
 }
