@@ -1,10 +1,8 @@
 package api
 
 import (
-	"encoding/json"
-	"net/http"
-
-	"github.com/swaggo/swag/example/basic/web"
+	"github.com/gin-gonic/gin"
+	"github.com/integration-system/swag/example/basic/web"
 )
 
 // GetStringByInt example
@@ -19,9 +17,9 @@ import (
 // @Failure 400 {object} web.APIError "We need ID!!"
 // @Failure 404 {object} web.APIError "Can not find ID"
 // @Router /testapi/get-string-by-int/{some_id} [get]
-func GetStringByInt(w http.ResponseWriter, r *http.Request) {
+func GetStringByInt(c *gin.Context) {
 	var pet web.Pet
-	if err := json.NewDecoder(r.Body).Decode(&pet); err != nil {
+	if err := c.ShouldBindJSON(&pet); err != nil {
 		// write your code
 		return
 	}
@@ -41,7 +39,7 @@ func GetStringByInt(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} web.APIError "We need ID!!"
 // @Failure 404 {object} web.APIError "Can not find ID"
 // @Router /testapi/get-struct-array-by-string/{some_id} [get]
-func GetStructArrayByString(w http.ResponseWriter, r *http.Request) {
+func GetStructArrayByString(c *gin.Context) {
 	// write your code
 }
 
@@ -56,7 +54,7 @@ func GetStructArrayByString(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} web.APIError "We need ID!!"
 // @Failure 404 {object} web.APIError "Can not find ID"
 // @Router /file/upload [post]
-func Upload(w http.ResponseWriter, r *http.Request) {
+func Upload(ctx *gin.Context) {
 	// write your code
 }
 

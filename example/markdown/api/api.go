@@ -7,7 +7,7 @@ import (
 
 // User example
 type User struct {
-	ID       int64
+	Id       int64
 	Email    string
 	Password string
 }
@@ -15,8 +15,8 @@ type User struct {
 // UsersCollection example
 type UsersCollection []User
 
-// Error example
-type Error struct {
+// APIError example
+type APIError struct {
 	ErrorCode    int
 	ErrorMessage string
 	CreatedAt    time.Time

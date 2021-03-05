@@ -10,9 +10,8 @@ void Hello(){
 import "C"
 
 import (
-	"net/http"
-
-	"github.com/swaggo/swag/testdata/simple_cgo/api"
+	"github.com/gin-gonic/gin"
+	"github.com/integration-system/swag/testdata/simple_cgo/api"
 )
 
 // @title Swagger Example API
@@ -59,6 +58,7 @@ import (
 func main() {
 	C.Hello()
 
-	http.HandleFunc("/testapi/get-string-by-int/", api.GetStringByInt)
-	http.ListenAndServe(":8080", nil)
+	r := gin.New()
+	r.GET("/testapi/get-string-by-int/:some_id", api.GetStringByInt)
+	r.Run()
 }

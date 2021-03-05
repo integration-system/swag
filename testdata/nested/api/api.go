@@ -1,9 +1,8 @@
 package api
 
 import (
-	"net/http"
-
-	"github.com/swaggo/swag/testdata/nested2"
+	"github.com/gin-gonic/gin"
+	"github.com/integration-system/swag/testdata/nested2"
 )
 
 type Foo struct {
@@ -24,7 +23,7 @@ type Bar struct {
 // @Produce json
 // @Success 200 {object} api.Foo
 // @Router /testapi/get-foo [get]
-func GetFoo(w http.ResponseWriter, r *http.Request) {
+func GetFoo(c *gin.Context) {
 	//write your code
 	var _ = Foo{}
 }

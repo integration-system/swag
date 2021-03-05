@@ -8,9 +8,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"strings"
-	"text/template"
 
-	"github.com/swaggo/swag"
+	"github.com/alecthomas/template"
+	"github.com/integration-system/swag"
 )
 
 var doc = `{

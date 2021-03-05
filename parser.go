@@ -21,6 +21,7 @@ import (
 	"unicode"
 
 	"github.com/KyleBanks/depth"
+	"github.com/asaskevich/govalidator"
 	"github.com/go-openapi/spec"
 )
 
@@ -103,7 +104,7 @@ func New(options ...func(*Parser)) *Parser {
 				Info: &spec.Info{
 					InfoProps: spec.InfoProps{
 						Contact: &spec.ContactInfo{},
-						License: nil,
+						License: &spec.License{},
 					},
 					VendorExtensible: spec.VendorExtensible{
 						Extensions: spec.Extensions{},
@@ -842,6 +843,7 @@ type structField struct {
 	schemaType   string
 	arrayType    string
 	formatType   string
+	pattern      string
 	isRequired   bool
 	readOnly     bool
 	crossPkg     string
@@ -927,6 +929,7 @@ func (parser *Parser) parseStructField(file *ast.File, field *ast.Field) (map[st
 	schema.Default = structField.defaultValue
 	schema.Example = structField.exampleValue
 	schema.Format = structField.formatType
+	schema.Pattern = structField.pattern
 	schema.Extensions = structField.extensions
 	eleSchema := schema
 	if structField.schemaType == "array" {
@@ -964,6 +967,123 @@ func getFieldType(field ast.Expr) (string, error) {
 		return fullName, nil
 	}
 	return "", fmt.Errorf("unknown field type %#v", field)
+}
+
+func processValidTag(tag string, structField *structField) {
+	optionsMap := make(map[string]string)
+	options := strings.Split(tag, ",")
+
+	for _, option := range options {
+		option = strings.TrimSpace(option)
+
+		validationOptions := strings.Split(option, "~")
+		if !isValidTag(validationOptions[0]) {
+			continue
+		}
+		if len(validationOptions) == 2 {
+			optionsMap[validationOptions[0]] = validationOptions[1]
+		} else {
+			optionsMap[validationOptions[0]] = ""
+		}
+	}
+	validators := make(map[string][]string, len(optionsMap))
+	for val := range optionsMap {
+		f, args := getValidTagValidatorFunction(val)
+		validators[f] = args
+	}
+	setValidTagValidators(validators, structField)
+
+}
+
+func setValidTagValidators(validators map[string][]string, t *structField) {
+	for f, args := range validators {
+		switch f {
+		case "uri":
+			fallthrough
+		case "email":
+			fallthrough
+		case "ipv4":
+			fallthrough
+		case "ipv6":
+			t.formatType = f
+		case "matches":
+			if len(args) > 0 {
+				t.pattern = args[0]
+			}
+		case "host":
+			t.formatType = "hostname"
+		case "required":
+			t.isRequired = true
+		case "length":
+			fallthrough
+		case "runelength":
+			if len(args) > 0 {
+				if val, err := strconv.ParseInt(args[0], 10, 64); err == nil {
+					t.minLength = &val
+				}
+				if len(args) > 1 {
+					if val, err := strconv.ParseInt(args[1], 10, 64); err == nil {
+						t.maxLength = &val
+					}
+				}
+			}
+		case "in":
+			if len(args) > 0 {
+				vals := strings.Split(args[0], "|")
+				enum := make([]interface{}, len(vals))
+				for i, val := range vals {
+					enum[i] = val
+				}
+				t.enums = append(t.enums, enum...)
+			}
+		case "range":
+			if len(args) > 0 {
+				if val, err := strconv.ParseFloat(args[0], 64); err == nil {
+					t.minimum = &val
+				}
+				if len(args) > 1 {
+					if val, err := strconv.ParseFloat(args[1], 64); err == nil {
+						t.maximum = &val
+					}
+				}
+			}
+		}
+	}
+}
+
+func getValidTagValidatorFunction(val string) (string, []string) {
+	for key, value := range govalidator.ParamTagRegexMap {
+		ps := value.FindStringSubmatch(val)
+		l := len(ps)
+		if l < 2 {
+			continue
+		}
+		args := make([]string, l-1)
+		for i := 1; i < l; i++ {
+			args[i-1] = ps[i]
+		}
+		return key, args
+	}
+	return val, []string{}
+}
+
+func isValidTag(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, c := range s {
+		switch {
+		case strings.ContainsRune("\\'\"!#$%&()*+-./:<=>?@[]^_{|}~ ", c):
+			// Backslash and quote chars are reserved, but
+			// otherwise any punctuation chars are allowed
+			// in a tag name.
+		default:
+			if !unicode.IsLetter(c) && !unicode.IsDigit(c) {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func (parser *Parser) getFieldName(field *ast.Field) (name string, schema *spec.Schema, err error) {
@@ -1065,6 +1185,9 @@ func (parser *Parser) parseFieldTag(field *ast.Field, types []string) (*structFi
 				break
 			}
 		}
+	}
+	if validTag := strings.TrimSpace(structTag.Get("valid")); validTag != "" && validTag != "-" {
+		processValidTag(validTag, structField)
 	}
 	if extensionsTag := structTag.Get("extensions"); extensionsTag != "" {
 		structField.extensions = map[string]interface{}{}

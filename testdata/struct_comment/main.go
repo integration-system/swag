@@ -1,9 +1,8 @@
 package main
 
 import (
-	"net/http"
-
-	"github.com/swaggo/swag/testdata/struct_comment/api"
+	"github.com/gin-gonic/gin"
+	"github.com/integration-system/swag/testdata/struct_comment/api"
 )
 
 // @title Swagger Example API
@@ -12,6 +11,7 @@ import (
 // @host localhost:4000
 // @basePath /api
 func main() {
-	http.HandleFunc("/posts/", api.GetPost)
-	http.ListenAndServe(":8080", nil)
+	r := gin.New()
+	r.GET("/posts/:post_id", api.GetPost)
+	r.Run()
 }

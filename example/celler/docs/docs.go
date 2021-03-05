@@ -7,17 +7,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"strings"
-	"text/template"
 
-	"github.com/swaggo/swag"
+	"github.com/alecthomas/template"
+	"github.com/integration-system/swag"
 )
 
 var doc = `{
     "schemes": {{ marshal .Schemes }},
     "swagger": "2.0",
     "info": {
-        "description": "{{.Description}}",
-        "title": "{{.Title}}",
+        "description": "This is a sample server celler server.",
+        "title": "Swagger Example API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "name": "API Support",
@@ -28,10 +28,10 @@ var doc = `{
             "name": "Apache 2.0",
             "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
         },
-        "version": "{{.Version}}"
+        "version": "1.0"
     },
-    "host": "{{.Host}}",
-    "basePath": "{{.BasePath}}",
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
     "paths": {
         "/accounts": {
             "get": {
@@ -104,6 +104,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
+                            "type": "object",
                             "$ref": "#/definitions/model.AddAccount"
                         }
                     }
@@ -931,6 +932,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "account": {
+                    "type": "object",
                     "$ref": "#/definitions/model.Account"
                 },
                 "id": {

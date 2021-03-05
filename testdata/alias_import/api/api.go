@@ -2,10 +2,10 @@ package api
 
 import (
 	"log"
-	"net/http"
 
-	"github.com/swaggo/swag/testdata/alias_import/data"
-	"github.com/swaggo/swag/testdata/alias_type/types"
+	"github.com/gin-gonic/gin"
+	"github.com/integration-system/swag/testdata/alias_import/data"
+	"github.com/integration-system/swag/testdata/alias_import/types"
 )
 
 // @Summary Get application
@@ -15,7 +15,7 @@ import (
 // @Produce  json
 // @Success 200 {object} data.ApplicationResponse	"ok"
 // @Router /testapi/application [get]
-func GetApplication(w http.ResponseWriter, r *http.Request) {
+func GetApplication(c *gin.Context) {
 	var foo = data.ApplicationResponse{
 		Application: types.Application{
 			Name: "name",
